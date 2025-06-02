@@ -24,5 +24,5 @@
 
 int		ft_forks(int *fd, char **kid_1, char **kid_2, char **envp);
 void	ft_free_str_array(char **str);
-char	*ft_get_path_command(char **kid, char **envp, char *path_mid);
+char	*ft_get_path_command(char **kid, char **envp);
 #endif

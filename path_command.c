@@ -12,11 +12,12 @@
 
 #include "pipex.h"
 
-char	*ft_check_command(char **path_list, char *path_mid, char *cmd)
+char	*ft_check_command(char **path_list, char *cmd)
 {
 	int		j;
 	int		i;
 	char	*path_fin;
+	char	*path_mid;
 
 	j = -1;
 	while (path_list[++j])
@@ -40,7 +41,7 @@ char	*ft_check_command(char **path_list, char *path_mid, char *cmd)
 	return (NULL);
 }
 
-char	*ft_get_path_command(char **cmd, char **envp, char *path_mid)
+char	*ft_get_path_command(char **cmd, char **envp)
 {
 	int		i;
 	char	*path;
@@ -55,7 +56,7 @@ char	*ft_get_path_command(char **cmd, char **envp, char *path_mid)
 		if (!ft_strncmp("PATH=", envp[i], 5))
 		{
 			path_list = ft_split(envp[i], ':');
-			path = ft_check_command(path_list, path_mid, cmd[0]);
+			path = ft_check_command(path_list, cmd[0]);
 			if (path)
 				return (path);
 		}

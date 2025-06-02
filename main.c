@@ -33,7 +33,7 @@ int	main(int argc, char **argv, char **envp)
 	fd[0] = open(argv[1], O_RDONLY);
 	if (fd[0] == -1)
 		return (ft_error(2, argv[1]));
-	fd[1] = open(argv[4], O_RDWR | O_CREAT | O_TRUNC, 0777);
+	fd[1] = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (fd[1] == -1)
 	{
 		close(fd[0]);
