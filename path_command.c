@@ -15,7 +15,6 @@
 char	*ft_check_command(char **path_list, char *cmd)
 {
 	int		j;
-	int		i;
 	char	*path_fin;
 	char	*path_mid;
 
@@ -26,16 +25,7 @@ char	*ft_check_command(char **path_list, char *cmd)
 		path_fin = ft_strjoin(path_mid, cmd);
 		free(path_mid);
 		if (access(path_fin, X_OK) == 0)
-		{
-			i = 0;
-			while (path_list[i])
-			{
-				free(path_list[i]);
-				i++;
-			}
-			free(path_list);
 			return (path_fin);
-		}
 		free(path_fin);
 	}
 	return (NULL);
@@ -47,6 +37,8 @@ char	*ft_get_path_command(char **cmd, char **envp)
 	char	*path;
 	char	**path_list;
 
+	if (!cmd || !cmd[0] || cmd[0][0] == '\0')
+		return (NULL);
 	if (ft_strchr(cmd[0], '/'))
 		if (access(cmd[0], X_OK) == 0)
 			return (ft_strdup(cmd[0]));
@@ -61,10 +53,11 @@ char	*ft_get_path_command(char **cmd, char **envp)
 				return (path);
 		}
 	}
-	while (i >= 0)
-	{
-		free(path_list[i]);
-		i--;
-	}
-	return (free(path_list), NULL);
+if (path_list)
+{
+	while (i >= 0 && path_list[i])
+		free(path_list[i--]);
+	free(path_list);
+}
+	return (NULL);
 }

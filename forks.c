@@ -19,8 +19,10 @@ int	ft_perror(int num)
 	else if (num == 2)
 		perror("fork failed");
 	else
+	{
 		perror("dup2 failed");
-	return (1);
+	}
+	exit (1);
 }
 
 void	ft_free_str_array(char **str)
@@ -41,17 +43,18 @@ void	ft_cmd_1(int *fd, int *pipe_fd, char **cmd_1, char **envp)
 	char	*path_command;
 
 	close(pipe_fd[0]);
-	if (dup2(fd[0], 0) == -1)
+	if (dup2(fd[0], STDIN_FILENO) == -1)
 		ft_perror(3);
 	close(fd[0]);
 	close(fd[1]);
-	if (dup2(pipe_fd[1], 1) == -1)
+	if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
 		ft_perror(3);
 	close(pipe_fd[1]);
 	path_command = ft_get_path_command(cmd_1, envp);
 	if (path_command)
 		execve(path_command, cmd_1, envp);
 	ft_free_str_array(cmd_1);
+	exit(127);
 }
 
 int	ft_cmd_2(int *fd, int *pipe_fd, char **cmd_2, char **envp)
@@ -59,9 +62,9 @@ int	ft_cmd_2(int *fd, int *pipe_fd, char **cmd_2, char **envp)
 	char	*path_command;
 
 	close(pipe_fd[1]);
-	dup2(pipe_fd[0], 0);
+	dup2(pipe_fd[0], STDIN_FILENO);
 	close(pipe_fd[0]);
-	dup2(fd[1], 1);
+	dup2(fd[1], STDOUT_FILENO);
 	close(fd[0]);
 	close(fd[1]);
 	path_command = ft_get_path_command(cmd_2, envp);
