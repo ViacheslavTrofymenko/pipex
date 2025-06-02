@@ -41,12 +41,12 @@ void	ft_cmd_1(int *fd, int *pipe_fd, char **cmd_1, char **envp)
 	char	*path_command;
 
 	close(pipe_fd[0]);
-	if (dup2(fd, 0) == -1)
-		return (ft_perror(3));
+	if (dup2(fd[0], 0) == -1)
+		ft_perror(3);
 	close(fd[0]);
 	close(fd[1]);
 	if (dup2(pipe_fd[1], 1) == -1)
-		return (ft_perror(3));
+		ft_perror(3);
 	close(pipe_fd[1]);
 	path_command = ft_get_path_command(cmd_1, envp);
 	if (path_command)

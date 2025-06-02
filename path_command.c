@@ -55,17 +55,16 @@ char	*ft_get_path_command(char **cmd, char **envp)
 	{
 		if (!ft_strncmp("PATH=", envp[i], 5))
 		{
-			path_list = ft_split(envp[i], ':');
+			path_list = ft_split(envp[i] + 5, ':');
 			path = ft_check_command(path_list, cmd[0]);
 			if (path)
 				return (path);
 		}
 	}
-	i = 0;
-	while (path_list[i])
+	while (i >= 0)
 	{
 		free(path_list[i]);
-		i++;
+		i--;
 	}
 	return (free(path_list), NULL);
 }
