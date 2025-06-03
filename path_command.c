@@ -32,7 +32,6 @@ char	*ft_check_command(char **path_list, char *cmd)
 		free(path_fin);
 		j++;
 	}
-	ft_free_str_array(path_list);
 	return (NULL);
 }
 
@@ -40,6 +39,7 @@ char	*ft_get_path_command(char **cmd, char **envp)
 {
 	int		i;
 	char	**path_list;
+	char	*path_command;
 
 	if (!cmd || !cmd[0] || cmd[0][0] == '\0')
 		return (NULL);
@@ -52,7 +52,9 @@ char	*ft_get_path_command(char **cmd, char **envp)
 		if (!ft_strncmp("PATH=", envp[i], 5))
 		{
 			path_list = ft_split(envp[i] + 5, ':');
-			return (ft_check_command(path_list, cmd[0]));
+			path_command = ft_check_command(path_list, cmd[0]);
+			ft_free_str_array(path_list);
+			return (path_command);
 		}
 	}
 	return (NULL);

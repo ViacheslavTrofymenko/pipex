@@ -57,7 +57,7 @@ void	ft_cmd_1(int *fd, int *pipe_fd, char **cmd_1, char **envp)
 	exit(127);
 }
 
-int	ft_cmd_2(int *fd, int *pipe_fd, char **cmd_2, char **envp)
+void	ft_cmd_2(int *fd, int *pipe_fd, char **cmd_2, char **envp)
 {
 	char	*path_command;
 
@@ -97,7 +97,7 @@ int	ft_forks(int *fd, char **cmd_1, char **cmd_2, char **envp)
 	if (pid_2 == 0)
 	{
 		ft_free_str_array(cmd_1);
-		status = ft_cmd_2(fd, pipe_fd, cmd_2, envp);
+		ft_cmd_2(fd, pipe_fd, cmd_2, envp);
 	}
 	close(pipe_fd[0]);
 	close(pipe_fd[1]);
