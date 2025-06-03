@@ -41,8 +41,10 @@ int	main(int argc, char **argv, char **envp)
 	}
 	cmd_1 = ft_split(argv[2], ' ');
 	cmd_2 = ft_split(argv[3], ' ');
-	if (!cmd_1 || !cmd_2)
+	if (!cmd_1 || !cmd_2 || !cmd_1[0] || !cmd_2[0])
 	{
+		ft_free_str_array(cmd_1);
+		ft_free_str_array(cmd_2);
 		close(fd[0]);
 		close(fd[1]);
 		return (ft_error(2, "ft_split"));

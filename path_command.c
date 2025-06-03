@@ -18,23 +18,27 @@ char	*ft_check_command(char **path_list, char *cmd)
 	char	*path_fin;
 	char	*path_mid;
 
-	j = -1;
-	while (path_list[++j])
+	j = 0;
+	while (path_list[j])
 	{
 		path_mid = ft_strjoin(path_list[j], "/");
 		path_fin = ft_strjoin(path_mid, cmd);
 		free(path_mid);
 		if (access(path_fin, X_OK) == 0)
+		{
+			ft_free_str_array(path_list);
 			return (path_fin);
+		}
 		free(path_fin);
+		j++;
 	}
+	ft_free_str_array(path_list);
 	return (NULL);
 }
 
 char	*ft_get_path_command(char **cmd, char **envp)
 {
 	int		i;
-	char	*path;
 	char	**path_list;
 
 	if (!cmd || !cmd[0] || cmd[0][0] == '\0')
@@ -48,16 +52,8 @@ char	*ft_get_path_command(char **cmd, char **envp)
 		if (!ft_strncmp("PATH=", envp[i], 5))
 		{
 			path_list = ft_split(envp[i] + 5, ':');
-			path = ft_check_command(path_list, cmd[0]);
-			if (path)
-				return (path);
+			return (ft_check_command(path_list, cmd[0]));
 		}
 	}
-if (path_list)
-{
-	while (i >= 0 && path_list[i])
-		free(path_list[i--]);
-	free(path_list);
-}
 	return (NULL);
 }
