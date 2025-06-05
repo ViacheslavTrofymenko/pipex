@@ -12,19 +12,6 @@
 
 #include "pipex.h"
 
-int	ft_perror(int num)
-{
-	if (num == 1)
-		perror("pipe failed");
-	else if (num == 2)
-		perror("fork failed");
-	else
-	{
-		perror("dup2 failed");
-	}
-	exit (1);
-}
-
 void	ft_free_str_array(char **str)
 {
 	int	i;
@@ -44,11 +31,11 @@ void	ft_cmd_1(int *fd, int *pipe_fd, char **cmd_1, char **envp)
 
 	close(pipe_fd[0]);
 	if (dup2(fd[0], STDIN_FILENO) == -1)
-		ft_perror(3);
+		ft_error(2, "dup2 failed");
 	close(fd[0]);
 	close(fd[1]);
 	if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
-		ft_perror(3);
+		ft_error(2, "dup2 failed");
 	close(pipe_fd[1]);
 	path_command = ft_get_path_command(cmd_1, envp);
 	if (path_command)
@@ -74,6 +61,17 @@ void	ft_cmd_2(int *fd, int *pipe_fd, char **cmd_2, char **envp)
 	exit(127);
 }
 
+int	ft_close_and_wait(int pipe_fd[2], pid_t pid_1, pid_t pid_2)
+{
+	int	status;
+
+	close(pipe_fd[0]);
+	close(pipe_fd[1]);
+	waitpid(pid_1, &status, 0);
+	waitpid(pid_2, &status, 0);
+	return (status);
+}
+
 int	ft_forks(int *fd, char **cmd_1, char **cmd_2, char **envp)
 {
 	int		pipe_fd[2];
@@ -82,10 +80,10 @@ int	ft_forks(int *fd, char **cmd_1, char **cmd_2, char **envp)
 	int		status;
 
 	if (pipe(pipe_fd) == -1)
-		ft_perror(1);
+		ft_error(2, "pipe failed");
 	pid_1 = fork();
 	if (pid_1 == -1)
-		ft_perror(2);
+		ft_error(2, "fork failed");
 	if (pid_1 == 0)
 	{
 		ft_free_str_array(cmd_2);
@@ -93,15 +91,13 @@ int	ft_forks(int *fd, char **cmd_1, char **cmd_2, char **envp)
 	}
 	pid_2 = fork();
 	if (pid_2 == -1)
-		ft_perror(2);
+		ft_error(2, "fork failed");
 	if (pid_2 == 0)
 	{
 		ft_free_str_array(cmd_1);
 		ft_cmd_2(fd, pipe_fd, cmd_2, envp);
 	}
-	close(pipe_fd[0]);
-	close(pipe_fd[1]);
-	waitpid(pid_1, &status, 0);
-	waitpid(pid_2, &status, 0);
+
+	status = ft_close_and_wait(pipe_fd, pid_1, pid_2);
 	return (WEXITSTATUS(status));
 }

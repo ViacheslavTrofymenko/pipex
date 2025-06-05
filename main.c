@@ -18,7 +18,14 @@ int	ft_error(int num, char *str)
 		ft_putstr_fd("Error:\n Incorrect number of arguments.\n", 2);
 	if (num == 2)
 		perror(str);
-	return (1);
+	exit (1);
+}
+void	ft_close_and_free(int fd[2], char **cmd_1, char **cmd_2)
+{
+	close(fd[0]);
+	close(fd[1]);
+	ft_free_str_array(cmd_1);
+	ft_free_str_array(cmd_2);
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -43,16 +50,10 @@ int	main(int argc, char **argv, char **envp)
 	cmd_2 = ft_split(argv[3], ' ');
 	if (!cmd_1 || !cmd_2 || !cmd_1[0] || !cmd_2[0])
 	{
-		ft_free_str_array(cmd_1);
-		ft_free_str_array(cmd_2);
-		close(fd[0]);
-		close(fd[1]);
+		ft_close_and_free(fd, cmd_1, cmd_2);
 		return (ft_error(2, "ft_split"));
 	}
 	status = ft_forks(fd, cmd_1, cmd_2, envp);
-	close(fd[0]);
-	close(fd[1]);
-	ft_free_str_array(cmd_1);
-	ft_free_str_array(cmd_2);
+	ft_close_and_free(fd, cmd_1, cmd_2);
 	return (status);
 }
