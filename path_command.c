@@ -14,23 +14,20 @@
 
 char	*ft_check_command(char **path_list, char *cmd)
 {
-	int		j;
+	int		i;
 	char	*path_fin;
 	char	*path_mid;
 
-	j = 0;
-	while (path_list[j])
+	i = 0;
+	while (path_list[i])
 	{
-		path_mid = ft_strjoin(path_list[j], "/");
+		path_mid = ft_strjoin(path_list[i], "/");
 		path_fin = ft_strjoin(path_mid, cmd);
 		free(path_mid);
 		if (access(path_fin, X_OK) == 0)
-		{
-			ft_free_str_array(path_list);
 			return (path_fin);
-		}
 		free(path_fin);
-		j++;
+		i++;
 	}
 	return (NULL);
 }
