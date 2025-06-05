@@ -12,9 +12,9 @@
 
 #include "pipex_bonus.h"
 
-void ft_free_str_array(char **str)
+void	ft_free_str_array(char **str)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (str[i])
@@ -24,6 +24,7 @@ void ft_free_str_array(char **str)
 	}
 	free(str);
 }
+
 int	ft_last_child(int *fd, int *pipe_fd, char **childs, char **envp)
 {
 	char	*path_command;
@@ -98,7 +99,7 @@ void	ft_first_child(int *fd, int *pipe_fd, char **childs, char **envp)
 	}
 }
 
-int ft_forks(int *fd, int argc, char **argv, char **envp)
+int	ft_forks(int *fd, int argc, char **argv, char **envp)
 {
 	int		*pipe_fd;
 	char	**childs;
@@ -121,6 +122,6 @@ int ft_forks(int *fd, int argc, char **argv, char **envp)
 	childs = ft_split(argv[i], ' ');
 	status = ft_last_child(fd, pipe_fd, childs, envp);
 	while (waitpid(-1, &status, 0) != -1)
-		continue;
+		continue ;
 	return (free(pipe_fd), WEXITSTATUS(status));
 }

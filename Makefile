@@ -31,11 +31,11 @@ $(NAME): $(OBJS)
 bonus: $(NAME_BONUS)
 
 $(NAME_BONUS): $(OBJS_BONUS)
-	$(MAKE) -C libft$
+	$(MAKE) -C libft
 	$(CC) $(OBJS_BONUS) -L libft -lft -o $(NAME_BONUS)
 
 clean:
-	$(MAKE) -C libft fclean
+	$(MAKE) -C libft clean
 	@rm -f	$(OBJS)
 	@rm -f	$(OBJS_BONUS)
 

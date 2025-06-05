@@ -20,6 +20,7 @@ int	ft_error(int num, char *str)
 		perror(str);
 	exit (1);
 }
+
 void	ft_close_and_free(int fd[2], char **cmd_1, char **cmd_2)
 {
 	close(fd[0]);
