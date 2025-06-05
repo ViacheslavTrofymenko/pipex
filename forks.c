@@ -97,7 +97,6 @@ int	ft_forks(int *fd, char **cmd_1, char **cmd_2, char **envp)
 		ft_free_str_array(cmd_1);
 		ft_cmd_2(fd, pipe_fd, cmd_2, envp);
 	}
-
 	status = ft_close_and_wait(pipe_fd, pid_1, pid_2);
 	return (WEXITSTATUS(status));
 }
