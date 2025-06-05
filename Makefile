@@ -15,11 +15,12 @@ NAME_BONUS	= pipex_bonus
 CC			= cc
 CFLAGS		= -Wall -Werror -Wextra -g3
 
-SRCS		=	main.c forks.c path_command.c
-SRCS_BONUS	=
+SRCS		= main.c forks.c path_command.c
+SRCS_BONUS	= src_bonus/main_bonus.c src_bonus/forks_bonus.c \
+				src_bonus/path_command_bonus.c src_bonus/here_doc_bonus.c
 
-OBJS		=	$(SRCS:.c=.o)
-OBJS_BONUS	=
+OBJS		= $(SRCS:.c=.o)
+OBJS_BONUS	= $(SRCS_BONUS:.c=.o)
 
 all: $(NAME)
 

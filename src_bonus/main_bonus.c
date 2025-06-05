@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "pipex_bonus.h"
 
 int	ft_error(int num, char *str)
 {
@@ -20,34 +20,27 @@ int	ft_error(int num, char *str)
 		perror(str);
 	exit (1);
 }
-void	ft_close_and_free(int fd[2], char **cmd_1, char **cmd_2)
-{
-	close(fd[0]);
-	close(fd[1]);
-	ft_free_str_array(cmd_1);
-	ft_free_str_array(cmd_2);
-}
 
 int	main(int argc, char **argv, char **envp)
 {
 	int		fd[2];
 	int		status;
-	char	**cmd_1;
-	char	**cmd_2;
 
 	if (argc < 5)
 		return (ft_error(1, argv[0]));
+	if (ft_strncmp("here_doc", argv[1], 8) == 0)
+	{
+		status = ft_here_doc(argc, argv, envp);
+		return (status);
+	}
 	fd[0] = open(argv[1], O_RDONLY);
 	if (fd[0] == -1)
 		return (ft_error(2, argv[1]));
 	fd[1] = open(argv[4], O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (fd[1] == -1)
 		return (close(fd[0]), ft_error(2, argv[4]));
-	cmd_1 = ft_split(argv[2], ' ');
-	cmd_2 = ft_split(argv[3], ' ');
-	if (!cmd_1 || !cmd_2 || !cmd_1[0] || !cmd_2[0])
-		return (ft_close_and_free(fd, cmd_1, cmd_2), ft_error(2, "ft_split"));
-	status = ft_forks(fd, cmd_1, cmd_2, envp);
-	ft_close_and_free(fd, cmd_1, cmd_2);
+	status = ft_forks(fd, argc, argv, envp);
+	close(fd[0]);
+	close(fd[1]);
 	return (status);
 }
