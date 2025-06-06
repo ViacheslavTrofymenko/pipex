@@ -15,36 +15,44 @@
 char	*ft_get_eof(char **argv)
 {
 	char	*eof;
+	size_t	len;
 
-	eof = (char *)malloc(ft_strlen(argv[2] + 2));
-	ft_strlcpy(eof, argv[2], ft_strlen(argv[2]) + 1);
-	eof[ft_strlen(argv[2])] = '\n';
-	eof[ft_strlen(argv[2]) + 1] = '\0';
+	len = ft_strlen(argv[2]);
+	eof = (char *)malloc(len + 2);
+	if (!eof)
+		return (NULL);
+	ft_strlcpy(eof, argv[2], len + 1);
+	eof[len] = '\n';
+	eof[len + 1] = '\0';
 	return (eof);
 }
 
 int	ft_write_temp(int *fd, char **argv, char *buffer)
 {
-	int	n_bytes;
+	int		n_bytes;
+	char	*eof;
+	int		result;
 
+	eof = ft_get_eof(argv);
+	if (!eof)
+		return (1);
+	result = 0;
 	while (1)
 	{
-		write(1, ">", 1);
-		n_bytes = read(STDIN_FILENO, buffer, 1024);
-		if (n_bytes == 0)
-			break ;
-		else if (n_bytes < 0)
+		write(1, "> ", 2);
+		n_bytes = read(STDIN_FILENO, buffer, 1023);
+		if (n_bytes <= 0)
 		{
-			close(fd[0]);
-			close(fd[1]);
-			return (1);
+			result = (n_bytes < 0) ? 1 : 0;
+			break;
 		}
 		buffer[n_bytes] = '\0';
-		if (!ft_strncmp(ft_get_eof(argv), buffer, n_bytes))
-			break ;
+		if (!ft_strncmp(eof, buffer, n_bytes + 1))
+			break;
 		write(fd[0], buffer, n_bytes);
 	}
-	return (0);
+	free(eof);
+	return (result);
 }
 
 int	ft_here_doc(int argc, char **argv, char **env)
@@ -55,19 +63,24 @@ int	ft_here_doc(int argc, char **argv, char **env)
 
 	if (argc != 6)
 		return (ft_error(1, argv[0]));
-	fd[0] = open("temp.txt", O_RDWR | O_CREAT, 0777);
+	fd[0] = open("temp.txt", O_RDWR | O_CREAT | O_TRUNC, 0600);
 	if (fd[0] < 0)
-		return (ft_error(2, argv[1]));
-	fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT, 0777);
+		return (ft_error(2, "temp.txt"));
+	fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd[1] < 0)
 	{
 		close(fd[0]);
 		return (ft_error(2, argv[argc - 1]));
 	}
 	if (ft_write_temp(fd, argv, buffer) == 1)
+	{
+		close(fd[0]);
+		close(fd[1]);
+		unlink("temp.txt");
 		return (1);
-	close (fd[0]);
-	fd[0] = open("temp.txt", O_RDONLY, 0777);
+	}
+	close(fd[0]);
+	fd[0] = open("temp.txt", O_RDONLY, 0600);
 	status = ft_forks(fd, argc - 1, argv + 1, env);
 	close(fd[0]);
 	close(fd[1]);

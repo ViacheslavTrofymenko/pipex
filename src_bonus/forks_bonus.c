@@ -25,103 +25,128 @@ void	ft_free_str_array(char **str)
 	free(str);
 }
 
-int	ft_last_child(int *fd, int *pipe_fd, char **childs, char **envp)
+int	ft_last_cmd(int *fd, int *pipe_fd, char **cmd, char **envp)
 {
 	char	*path_command;
-	pid_t	num_fork;
+	pid_t	pid;
+	int		status;
 
-	num_fork = fork();
-	if (num_fork == 0)
+	pid = fork();
+	if (pid == -1)
+		return (ft_error(2, "fork failed"));
+	if (pid == 0)
 	{
 		close(pipe_fd[1]);
-		dup2(pipe_fd[0], 0);
+		if (dup2(pipe_fd[0], 0) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd[0]);
-		dup2(fd[1], 1);
+		if (dup2(fd[1], 1) == -1)
+			ft_error(2, "dup2 failed");
 		close(fd[0]);
 		close(fd[1]);
-		path_command = ft_get_path_command(childs, envp);
+		path_command = ft_get_path_command(cmd, envp);
 		if (path_command)
-			execve(path_command, childs, envp);
-		ft_free_str_array(childs);
-		exit (127);
+			execve(path_command, cmd, envp);
+		ft_free_str_array(cmd);
+		exit(127);
 	}
 	close(pipe_fd[0]);
 	close(pipe_fd[1]);
-	ft_free_str_array(childs);
-	return (0);
+	ft_free_str_array(cmd);
+	waitpid(pid, &status, 0);
+	return (WEXITSTATUS(status));
 }
 
-int	*ft_mid_child(int *pipe_fd_1, char **childs, char **envp, int *fd)
+void	ft_mid_cmd(int *pipe_fd_1, char **cmd, char **envp, int *fd)
 {
-	int		*pipe_fd_2;
-	pid_t	num_fork;
+	int		pipe_fd_2[2];
+	pid_t	pid;
 	char	*path_command;
 
-	pipe_fd_2 = malloc(2 * sizeof(int));
-	pipe(pipe_fd_2);
-	num_fork = fork();
-	if (num_fork == 0)
+	if (pipe(pipe_fd_2) == -1)
+		ft_error(2, "pipe failed");
+	pid = fork();
+	if (pid == -1)
+		ft_error(2, "fork failed");
+	if (pid == 0)
 	{
 		close(pipe_fd_1[1]);
-		dup2(pipe_fd_1[0], 0);
+		if (dup2(pipe_fd_1[0], 0) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd_1[0]);
 		close(fd[0]);
 		close(fd[1]);
 		close(pipe_fd_2[0]);
-		dup2(pipe_fd_2[1], 1);
+		if (dup2(pipe_fd_2[1], 1) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd_2[1]);
-		path_command = ft_get_path_command(childs, envp);
+		path_command = ft_get_path_command(cmd, envp);
 		if (path_command)
-			execve(path_command, childs, envp);
-		ft_free_str_array(childs);
+			execve(path_command, cmd, envp);
+		ft_free_str_array(cmd);
+		exit(127);
 	}
-	return (free(pipe_fd_1), pipe_fd_2);
+	close(pipe_fd_1[0]);
+	close(pipe_fd_1[1]);
+	ft_free_str_array(cmd);
+	pipe_fd_1[0] = pipe_fd_2[0];
+	pipe_fd_1[1] = pipe_fd_2[1];
 }
 
-void	ft_first_child(int *fd, int *pipe_fd, char **childs, char **envp)
+void	ft_first_cmd(int *fd, int *pipe_fd, char **cmd, char **envp)
 {
 	char	*path_command;
-	pid_t	num_fork;
+	pid_t	pid;
 
-	num_fork = fork();
-	if (num_fork == 0)
+	pid = fork();
+	if (pid == -1)
+		ft_error(2, "fork failed");
+	if (pid == 0)
 	{
 		close(pipe_fd[0]);
-		dup2(fd[0], 0);
+		if (dup2(fd[0], 0) == -1)
+			ft_error(2, "dup2 failed");
 		close(fd[0]);
 		close(fd[1]);
-		dup2(pipe_fd[1], 1);
+		if (dup2(pipe_fd[1], 1) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd[1]);
-		path_command = ft_get_path_command(childs, envp);
+		path_command = ft_get_path_command(cmd, envp);
 		if (path_command)
-			execve(path_command, childs, envp);
-		ft_free_str_array(childs);
+			execve(path_command, cmd, envp);
+		ft_free_str_array(cmd);
+		exit(127);
 	}
+	ft_free_str_array(cmd);
 }
 
 int	ft_forks(int *fd, int argc, char **argv, char **envp)
 {
-	int		*pipe_fd;
-	char	**childs;
+	int		pipe_fd[2];
+	char	**cmd;
 	int		status;
 	int		i;
 
-	pipe_fd = malloc(2 * sizeof(int));
-	pipe(pipe_fd);
-	childs = ft_split(argv[2], ' ');
-	ft_first_child(fd, pipe_fd, childs, envp);
+	if (pipe(pipe_fd) == -1)
+		return (ft_error(2, "pipe failed"));
+	cmd = ft_split(argv[2], ' ');
+	if (!cmd)
+		return (ft_error(2, "ft_split failed"));
+	ft_first_cmd(fd, pipe_fd, cmd, envp);
 	i = 3;
 	while (i <= argc - 3)
 	{
-		ft_free_str_array(childs);
-		childs = ft_split(argv[i], ' ');
-		pipe_fd = ft_mid_child(pipe_fd, childs, envp, fd);
+		cmd = ft_split(argv[i], ' ');
+		if (!cmd)
+			return (ft_error(2, "ft_split failed"));
+		ft_mid_cmd(pipe_fd, cmd, envp, fd);
 		i++;
 	}
-	ft_free_str_array(childs);
-	childs = ft_split(argv[i], ' ');
-	status = ft_last_child(fd, pipe_fd, childs, envp);
-	while (waitpid(-1, &status, 0) != -1)
-		continue ;
-	return (free(pipe_fd), WEXITSTATUS(status));
+	cmd = ft_split(argv[i], ' ');
+	if (!cmd)
+		return (ft_error(2, "ft_split failed"));
+	status = ft_last_cmd(fd, pipe_fd, cmd, envp);
+	while (waitpid(-1, NULL, 0) != -1)
+		continue;
+	return (status);
 }
