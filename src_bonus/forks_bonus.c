@@ -28,18 +28,21 @@ void	ft_free_str_array(char **str)
 int	ft_last_child(int *fd, int *pipe_fd, char **childs, char **envp)
 {
 	char	*path_command;
-	pid_t	num_fork;
+	pid_t	pid;
 
-	num_fork = fork();
-	if (num_fork == 0)
+	pid = fork();
+	if (pid == 0)
 	{
 		close(pipe_fd[1]);
-		dup2(pipe_fd[0], 0);
+		if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd[0]);
-		dup2(fd[1], 1);
+		if (dup2(fd[1], STDOUT_FILENO) == -1)
+			ft_error(2, "dup2 failed");
 		close(fd[0]);
 		close(fd[1]);
 		path_command = ft_get_path_command(childs, envp);
+		printf("CommandLast: path: %s\n", path_command ? path_command : "NULL");
 		if (path_command)
 			execve(path_command, childs, envp);
 		ft_free_str_array(childs);
@@ -54,23 +57,27 @@ int	ft_last_child(int *fd, int *pipe_fd, char **childs, char **envp)
 int	*ft_mid_child(int *pipe_fd_1, char **childs, char **envp, int *fd)
 {
 	int		*pipe_fd_2;
-	pid_t	num_fork;
+	pid_t	pid;
 	char	*path_command;
 
 	pipe_fd_2 = malloc(2 * sizeof(int));
-	pipe(pipe_fd_2);
-	num_fork = fork();
-	if (num_fork == 0)
+	if (!pipe_fd_2 || pipe(pipe_fd_2) == -1)
+		ft_error(2, "pipe failed");
+	pid = fork();
+	if (pid == 0)
 	{
 		close(pipe_fd_1[1]);
-		dup2(pipe_fd_1[0], 0);
+		if (dup2(pipe_fd_1[0], STDIN_FILENO) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd_1[0]);
 		close(fd[0]);
 		close(fd[1]);
 		close(pipe_fd_2[0]);
-		dup2(pipe_fd_2[1], 1);
+		if (dup2(pipe_fd_2[1], STDOUT_FILENO) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd_2[1]);
 		path_command = ft_get_path_command(childs, envp);
+		printf("CommandMid: path: %s\n", path_command ? path_command : "NULL");
 		if (path_command)
 			execve(path_command, childs, envp);
 		ft_free_str_array(childs);
@@ -81,18 +88,23 @@ int	*ft_mid_child(int *pipe_fd_1, char **childs, char **envp, int *fd)
 void	ft_first_child(int *fd, int *pipe_fd, char **childs, char **envp)
 {
 	char	*path_command;
-	pid_t	num_fork;
+	pid_t	pid;
 
-	num_fork = fork();
-	if (num_fork == 0)
+	pid = fork();
+	if (pid == -1)
+		ft_error(2, "fork failed");
+	if (pid == 0)
 	{
 		close(pipe_fd[0]);
-		dup2(fd[0], 0);
+		if (dup2(fd[0], STDIN_FILENO) == -1)
+			ft_error(2, "dup2 failed");
 		close(fd[0]);
 		close(fd[1]);
-		dup2(pipe_fd[1], 1);
+		if (dup2(pipe_fd[1], STDOUT_FILENO) == -1)
+			ft_error(2, "dup2 failed");
 		close(pipe_fd[1]);
 		path_command = ft_get_path_command(childs, envp);
+		printf("CommandFirst: path: %s\n", path_command ? path_command : "NULL");
 		if (path_command)
 			execve(path_command, childs, envp);
 		ft_free_str_array(childs);
@@ -106,8 +118,10 @@ int	ft_forks(int *fd, int argc, char **argv, char **envp)
 	int		status;
 	int		i;
 
+	printf("HELLO\n");
 	pipe_fd = malloc(2 * sizeof(int));
-	pipe(pipe_fd);
+	if (!pipe_fd || pipe(pipe_fd) == -1)
+		return (ft_error(2, "pipe failed"));
 	childs = ft_split(argv[2], ' ');
 	ft_first_child(fd, pipe_fd, childs, envp);
 	i = 3;
@@ -121,6 +135,7 @@ int	ft_forks(int *fd, int argc, char **argv, char **envp)
 	ft_free_str_array(childs);
 	childs = ft_split(argv[i], ' ');
 	status = ft_last_child(fd, pipe_fd, childs, envp);
+	printf("BUY\n");
 	while (waitpid(-1, &status, 0) != -1)
 		continue ;
 	return (free(pipe_fd), WEXITSTATUS(status));
