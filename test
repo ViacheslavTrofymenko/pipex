@@ -1,0 +1,17 @@
+./pipex_bonus input "cat" "wc -l" output
+./pipex_bonus input "cat" "grep hello" "wc -l" output
+./pipex_bonus input "/bin/cat" "/usr/bin/grep hello" "wc -l" output
+./pipex_bonus here_doc LIMITER "cat" "wc -l" output
+
+
+./pipex_bonus nofile "cat" "wc -l" output
+./pipex_bonus input "notacommand" "wc -l" output
+./pipex_bonus input "cat"
+./pipex_bonus input "cat" "wc -l" output
+./pipex_bonus here_doc "cat" "wc -l" output
+./pipex_bonus input "grep 'hello world'" "wc -l" output
+
+
+/pipex_bonus input "cat" "wc -l" output  # infile — empty
+./pipex_bonus here_doc END cat wc output  # heredoc with log input
+./pipex_bonus input "cat" "grep a" "sort" "uniq" "tr a-z A-Z" "rev" "cat" "wc -c" "head -n 1" output

@@ -43,7 +43,8 @@ int	ft_write_temp(int *fd, char **argv, char *buffer)
 		n_bytes = read(STDIN_FILENO, buffer, 1023);
 		if (n_bytes <= 0)
 		{
-			result = (n_bytes < 0) ? 1 : 0;
+			if (n_bytes < 0)
+				result = 1;
 			break;
 		}
 		buffer[n_bytes] = '\0';
@@ -55,6 +56,17 @@ int	ft_write_temp(int *fd, char **argv, char *buffer)
 	return (result);
 }
 
+int	ft_clean_and_return(int *fd, char *file, int ret)
+{
+	if (fd[0] >= 0)
+		close(fd[0]);
+	if (fd[1] >= 0)
+		close(fd[1]);
+	if (file)
+		unlink(file);
+	return (ret);
+}
+
 int	ft_here_doc(int argc, char **argv, char **env)
 {
 	int		fd[2];
@@ -63,27 +75,18 @@ int	ft_here_doc(int argc, char **argv, char **env)
 
 	if (argc != 6)
 		return (ft_error(1, argv[0]));
-	fd[0] = open("temp.txt", O_RDWR | O_CREAT | O_TRUNC, 0600);
+	fd[0] = open("temp.txt", O_RDWR | O_CREAT | O_TRUNC, 0644);
 	if (fd[0] < 0)
 		return (ft_error(2, "temp.txt"));
 	fd[1] = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd[1] < 0)
-	{
-		close(fd[0]);
-		return (ft_error(2, argv[argc - 1]));
-	}
-	if (ft_write_temp(fd, argv, buffer) == 1)
-	{
-		close(fd[0]);
-		close(fd[1]);
-		unlink("temp.txt");
-		return (1);
-	}
+		return (ft_clean_and_return(fd, NULL, ft_error(2, argv[argc - 1])));
+	if (ft_write_temp(fd, argv, buffer))
+		return (ft_clean_and_return(fd, "temp.txt", 1));
 	close(fd[0]);
 	fd[0] = open("temp.txt", O_RDONLY, 0600);
+	if (fd[0] < 0)
+		return (ft_clean_and_return(fd, "temp.txt", ft_error(2, "temp.txt")));
 	status = ft_forks(fd, argc - 1, argv + 1, env);
-	close(fd[0]);
-	close(fd[1]);
-	unlink("temp.txt");
-	return (status);
+	return (ft_clean_and_return(fd, "temp.txt", status));
 }
