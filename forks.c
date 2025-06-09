@@ -50,9 +50,11 @@ void	ft_cmd_2(int *fd, int *pipe_fd, char **cmd_2, char **envp)
 	char	*path_command;
 
 	close(pipe_fd[1]);
-	dup2(pipe_fd[0], STDIN_FILENO);
+	if (dup2(pipe_fd[0], STDIN_FILENO) == -1)
+		ft_error(2, "dup2 failed");
 	close(pipe_fd[0]);
-	dup2(fd[1], STDOUT_FILENO);
+	if (dup2(fd[1], STDOUT_FILENO) == -1)
+		ft_error(2, "dup2 failed");
 	close(fd[0]);
 	close(fd[1]);
 	path_command = ft_get_path_command(cmd_2, envp);

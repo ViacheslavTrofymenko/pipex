@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_utils_bonus.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vtrofyme <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/21 13:10:50 by vtrofyme          #+#    #+#             */
-/*   Updated: 2025/05/21 13:10:53 by vtrofyme         ###   ########.fr       */
+/*   Created: 2025/06/09 14:05:50 by vtrofyme          #+#    #+#             */
+/*   Updated: 2025/06/09 14:05:53 by vtrofyme         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "pipex_bonus.h"
 
 int	ft_error(int num, char *str)
 {
@@ -36,26 +36,38 @@ void	ft_close_and_free(int fd[2], char **cmd_1, char **cmd_2)
 	close(fd[1]);
 }
 
-int	main(int argc, char **argv, char **envp)
+void	ft_close_fds_in_child(int *pipe_fd_1, int *fd, int *pipe_fd_2)
 {
-	int		fd[2];
-	int		status;
-	char	**cmd_1;
-	char	**cmd_2;
+	close(pipe_fd_1[1]);
+	if (dup2(pipe_fd_1[0], 0) == -1)
+		ft_error(2, "dup2 failed");
+	close(pipe_fd_1[0]);
+	close(fd[0]);
+	close(fd[1]);
+	close(pipe_fd_2[0]);
+	if (dup2(pipe_fd_2[1], 1) == -1)
+		ft_error(2, "dup2 failed");
+	close(pipe_fd_2[1]);
+}
 
-	if (argc != 5)
-		return (ft_error(1, argv[0]));
-	fd[0] = open(argv[1], O_RDONLY);
-	if (fd[0] == -1)
-		return (ft_error(2, argv[1]));
-	fd[1] = open(argv[4], O_CREAT | O_WRONLY | O_TRUNC, 0644);
-	if (fd[1] == -1)
-		return (close(fd[0]), ft_error(2, argv[4]));
-	cmd_1 = ft_split(argv[2], ' ');
-	cmd_2 = ft_split(argv[3], ' ');
-	if (!cmd_1 || !cmd_2 || !cmd_1[0] || !cmd_2[0])
-		return (ft_close_and_free(fd, cmd_1, cmd_2), ft_error(2, "ft_split"));
-	status = ft_forks(fd, cmd_1, cmd_2, envp);
-	ft_close_and_free(fd, cmd_1, cmd_2);
-	return (status);
+void	ft_exec_or_exit(char **cmd, char **envp)
+{
+	char	*path_command;
+
+	path_command = ft_get_path_command(cmd, envp);
+	if (path_command)
+		execve(path_command, cmd, envp);
+	ft_error(3, cmd[0]);
+	ft_free_str_array(cmd);
+	exit(127);
+}
+
+char	**ft_split_or_exit(char *arg)
+{
+	char	**cmd;
+
+	cmd = ft_split(arg, ' ');
+	if (!cmd)
+		ft_error(2, "ft_split failed");
+	return (cmd);
 }

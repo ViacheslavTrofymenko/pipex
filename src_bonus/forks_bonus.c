@@ -25,41 +25,8 @@ void	ft_free_str_array(char **str)
 	free(str);
 }
 
-void	ft_close_fds_in_child(int *pipe_fd_1, int *fd, int *pipe_fd_2)
-{
-	close(pipe_fd_1[1]);
-	if (dup2(pipe_fd_1[0], 0) == -1)
-	ft_error(2, "dup2 failed");
-	close(pipe_fd_1[0]);
-	close(fd[0]);
-	close(fd[1]);
-	close(pipe_fd_2[0]);
-	if (dup2(pipe_fd_2[1], 1) == -1)
-		ft_error(2, "dup2 failed");
-	close(pipe_fd_2[1]);
-}
-
-void	ft_exec_or_exit(char **cmd, char **envp)
-{
-	char *path_command = ft_get_path_command(cmd, envp);
-
-	if (path_command)
-		execve(path_command, cmd, envp);
-	ft_error(3, cmd[0]);
-	ft_free_str_array(cmd);
-	exit(127);
-}
-char **ft_split_or_exit(char *arg)
-{
-	char **cmd = ft_split(arg, ' ');
-	if (!cmd)
-		ft_error(2, "ft_split failed");
-	return cmd;
-}
-
 int	ft_last_cmd(int *fd, int *pipe_fd, char **cmd, char **envp)
 {
-
 	pid_t	pid;
 	int		status;
 
@@ -75,7 +42,8 @@ int	ft_last_cmd(int *fd, int *pipe_fd, char **cmd, char **envp)
 		if (dup2(fd[1], 1) == -1)
 			ft_error(2, "dup2 failed");
 		close(fd[0]);
-		close(fd[1]);		ft_exec_or_exit(cmd, envp);
+		close(fd[1]);
+		ft_exec_or_exit(cmd, envp);
 	}
 	close(pipe_fd[0]);
 	close(pipe_fd[1]);
@@ -149,6 +117,6 @@ int	ft_forks(int *fd, int argc, char **argv, char **envp)
 	cmd = ft_split_or_exit(argv[i]);
 	status = ft_last_cmd(fd, pipe_fd, cmd, envp);
 	while (waitpid(-1, NULL, 0) != -1)
-		continue;
+		continue ;
 	return (status);
 }

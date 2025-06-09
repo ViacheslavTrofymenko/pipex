@@ -45,11 +45,11 @@ int	ft_write_temp(int *fd, char **argv, char *buffer)
 		{
 			if (n_bytes < 0)
 				result = 1;
-			break;
+			break ;
 		}
 		buffer[n_bytes] = '\0';
 		if (!ft_strncmp(eof, buffer, n_bytes + 1))
-			break;
+			break ;
 		write(fd[0], buffer, n_bytes);
 	}
 	free(eof);
@@ -67,7 +67,7 @@ int	ft_clean_and_return(int *fd, char *file, int ret)
 	return (ret);
 }
 
-int	ft_here_doc(int argc, char **argv, char **envp)
+int	ft_here_doc(int argc, char **argv, char **env)
 {
 	int		fd[2];
 	char	buffer[1024];

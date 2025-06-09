@@ -12,20 +12,6 @@
 
 #include "pipex_bonus.h"
 
-int	ft_error(int num, char *str)
-{
-	if (num == 1)
-		ft_putstr_fd("Error:\n Incorrect number of arguments.\n", 2);
-	if (num == 2)
-		perror(str);
-	if (num == 3)
-	{
-		ft_putstr_fd(str, 2);
-		ft_putstr_fd(": command not a found\n", 2);
-	}
-	exit (1);
-}
-
 int	main(int argc, char **argv, char **envp)
 {
 	int		fd[2];
