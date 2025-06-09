@@ -40,6 +40,7 @@ void	ft_cmd_1(int *fd, int *pipe_fd, char **cmd_1, char **envp)
 	path_command = ft_get_path_command(cmd_1, envp);
 	if (path_command)
 		execve(path_command, cmd_1, envp);
+	ft_error(3, cmd_1[0]);
 	ft_free_str_array(cmd_1);
 	exit(127);
 }
@@ -57,6 +58,7 @@ void	ft_cmd_2(int *fd, int *pipe_fd, char **cmd_2, char **envp)
 	path_command = ft_get_path_command(cmd_2, envp);
 	if (path_command)
 		execve(path_command, cmd_2, envp);
+	ft_error(3, cmd_2[0]);
 	ft_free_str_array(cmd_2);
 	exit(127);
 }
